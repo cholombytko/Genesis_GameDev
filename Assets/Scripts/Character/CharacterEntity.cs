@@ -6,6 +6,8 @@ namespace Character {
     [RequireComponent(typeof(Rigidbody2D))]
     public class CharacterEntity : MonoBehaviour
     {
+        [SerializeField] private Animator _animator;
+
         [Header("HorizontalMovement")] [SerializeField]
         private float _horizontalSpeed;
 
@@ -16,24 +18,29 @@ namespace Character {
         [SerializeField] private LayerMask _ground;
         [SerializeField] private Transform legs;
 
-
         private Rigidbody2D _rigidbody;
 
-        public static bool IsJumping;
+        private bool _isJumping;
 
         private void Start()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
         }
 
+        private void Update()
+        {
+ 
+        }
+
         private void FixedUpdate()
         {
-            IsJumping = !Physics2D.OverlapCircle(legs.position, 0.2f, _ground);
+            _isJumping = !Physics2D.OverlapCircle(legs.position, 0.2f, _ground);
         }
 
         public void MoveHorizontally(float direction)
         {
             SetDirection(direction);
+            _animator.SetBool("walk", direction != 0);
             Vector2 velocity = _rigidbody.velocity;
             velocity.x = direction * _horizontalSpeed;
             _rigidbody.velocity = velocity;
@@ -41,10 +48,13 @@ namespace Character {
 
         public void Jump()
         {
-            if (IsJumping)
+            if (_isJumping)
+            {
                 return;
+            }
 
-            IsJumping = true;
+            _isJumping = true;
+            _animator.SetTrigger("jump");
             _rigidbody.AddForce(Vector2.up * _jumpForce);
             _rigidbody.gravityScale = _gravityScale;
         }
